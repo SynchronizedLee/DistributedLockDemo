@@ -3,3 +3,5 @@ CREATE TABLE `order` (
   `order_state` int(11) DEFAULT NULL COMMENT '订单状态，0是未被抢，1是已被抢',
   PRIMARY KEY (`order_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `distribute`.`order`(`order_id`, `order_state`) VALUES (1, 0);

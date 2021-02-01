@@ -4,6 +4,7 @@ import org.redisson.RedissonRedLock;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.RestController;
 import pri.liyang.api.RemoteService;
 import pri.liyang.entity.Order;
@@ -18,19 +19,28 @@ public class ProviderController implements RemoteService {
     private OrderService orderService;
 
     @Autowired
-    private RedissonClient redissonClient;
+    @Qualifier("redissonRed6379")
+    private RedissonClient redissonRed6379;
+    @Autowired
+    @Qualifier("redissonRed6380")
+    private RedissonClient redissonRed6380;
+    @Autowired
+    @Qualifier("redissonRed6381")
+    private RedissonClient redissonRed6381;
 
     @Override
     public String grabOrder(Integer orderId, Integer driverId) {
         // 一个订单就是一个字符串key的锁
         String lockKey = ("order_" + orderId).intern();
 
-        // 根据订单字符串，拿到一台Redis的分布式锁
-        RLock rLock = redissonClient.getLock(lockKey);
+        // 根据订单字符串，拿到所有Redis的分布式锁（可以只有1台，建议奇数台）
+        RLock rLock6379 = redissonRed6379.getLock(lockKey);
+        RLock rLock6380 = redissonRed6380.getLock(lockKey);
+        RLock rLock6381 = redissonRed6381.getLock(lockKey);
 
         // 将Redis分布式锁，集成到Redisson红锁中，这里可以放多个RLock
         // 也即是多个Redis实例来完成红锁分布式锁
-        RedissonRedLock rrLock = new RedissonRedLock(rLock);
+        RedissonRedLock rrLock = new RedissonRedLock(rLock6379, rLock6380, rLock6381);
 
         try {
             // 分布式红锁加锁
