@@ -6,6 +6,8 @@ import pri.liyang.api.RemoteService;
 import pri.liyang.entity.Order;
 import pri.liyang.service.OrderService;
 
+import java.util.Random;
+
 @RestController
 public class ProviderController implements RemoteService {
 
@@ -17,6 +19,13 @@ public class ProviderController implements RemoteService {
 
         // 查询订单状态
         Order order = orderService.queryById(orderId);
+
+        try {
+            // 模拟网络延迟，多线程导致数据错乱
+            Thread.sleep(300 + new Random().nextInt(300));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         // 是否抢到订单
         boolean isGrabbed = false;
